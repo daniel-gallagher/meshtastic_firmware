@@ -9,6 +9,9 @@
 #include "PortduinoGlue.h"
 #endif
 
+// Global variable from main.cpp
+extern unsigned long last_listen;
+
 #if ARCH_PORTDUINO
 #define RF95_MAX_POWER portduino_config.rf95_max_power
 #endif
@@ -297,6 +300,7 @@ void RF95Interface::startReceive()
         LOG_ERROR("RF95 startReceive %s%d", radioLibErr, err);
     assert(err == RADIOLIB_ERR_NONE);
 
+    last_listen = millis();
     isReceiving = true;
 
     // Must be done AFTER, starting receive, because startReceive clears (possibly stale) interrupt pending register bits
