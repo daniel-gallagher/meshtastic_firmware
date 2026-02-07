@@ -1,0 +1,59 @@
+#define I2C_SDA 42
+#define I2C_SCL 41
+
+#define LED_PIN 13
+
+#define HAS_NEOPIXEL
+#define NEOPIXEL_COUNT 1
+#define NEOPIXEL_DATA 33
+#define NEOPIXEL_TYPE (NEO_GRB + NEO_KHZ800)
+#define NEOPIXEL_POWER 34
+
+#define BUTTON_PIN 0
+#define BUTTON_NEED_PULLUP
+
+// SPI (shared by LoRa and TFT)
+#define SPI_MOSI 35
+#define SPI_SCK 36
+#define SPI_MISO 37
+
+// RFM95/SX127x
+#define USE_RF95
+#define LORA_MISO SPI_MISO
+#define LORA_SCK SPI_SCK
+#define LORA_MOSI SPI_MOSI
+#define LORA_CS 6
+#define LORA_RESET 9
+#define LORA_IRQ 5
+#define LORA_DIO0 LORA_IRQ
+
+#define LORA_DIO1 RADIOLIB_NC
+#define LORA_DIO2 RADIOLIB_NC
+
+// TFT ST7789
+#define USE_TFTDISPLAY 1
+#define TFT_CS 7
+#define TFT_BL 45
+#define ST7789_CS TFT_CS
+#define ST7789_SDA SPI_MOSI
+#define ST7789_MISO SPI_MISO
+#define ST7789_SCK SPI_SCK
+#define ST7789_RS 39
+#define ST7789_RESET 40
+#define ST7789_BUSY -1
+#define ST7789_BL TFT_BL
+#define SPI_FREQUENCY 40000000
+#define SPI_READ_FREQUENCY 16000000
+#define ST7789_SPI_HOST SPI2_HOST
+#define TFT_I2C_POWER 21
+#define TFT_HEIGHT 320
+#define TFT_WIDTH 240
+
+// Experiment for 240x135 display on 240x320 panel
+#define ST7789_ALT
+#define TFT_PANEL_HEIGHT 240
+#define TFT_PANEL_WIDTH 135
+
+#define TFT_OFFSET_X 52
+#define TFT_OFFSET_Y 40
+#define TFT_OFFSET_ROTATION 0
