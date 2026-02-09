@@ -1184,9 +1184,17 @@ TFTDisplay::TFTDisplay(uint8_t address, int sda, int scl, OLEDDISPLAY_GEOMETRY g
     }
 
 #elif defined(SCREEN_ROTATE)
+#if defined(ST7789_ALT)
+    setGeometry(GEOMETRY_RAWMODE, TFT_PANEL_WIDTH, TFT_PANEL_HEIGHT);
+#else
     setGeometry(GEOMETRY_RAWMODE, TFT_HEIGHT, TFT_WIDTH);
+#endif
+#else
+#if defined(ST7789_ALT)
+    setGeometry(GEOMETRY_RAWMODE, TFT_PANEL_HEIGHT, TFT_PANEL_WIDTH);
 #else
     setGeometry(GEOMETRY_RAWMODE, TFT_WIDTH, TFT_HEIGHT);
+#endif
 #endif
 }
 
