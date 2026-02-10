@@ -153,7 +153,7 @@ bool MAX17048Sensor::getMetrics(meshtastic_Telemetry *measurement)
     soc = clamp(soc, 0.0f, 100.0f);      // clamp soc between 0 and 100%
     float ttg = (100.0f - soc) / rate;   // calculate hours to charge/discharge
 
-    LOG_DEBUG("MAX17048 getMetrics volts: %.3fV soc: %.1f%% ttg: %.1f hours", volts, soc, ttg);
+    LOG_DEBUG("MAX17048 getMetrics volts: %.3fV soc: %.1f%% ttg: %.1fh rate: %.1f%%/h", volts, soc, ttg, rate);
     if ((int)measurement->which_variant == meshtastic_Telemetry_power_metrics_tag) {
         measurement->variant.power_metrics.has_ch1_voltage = true;
         measurement->variant.power_metrics.ch1_voltage = volts;
