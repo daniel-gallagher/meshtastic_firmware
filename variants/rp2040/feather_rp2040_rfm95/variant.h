@@ -6,7 +6,8 @@
 #define I2C_SDA 2
 #define I2C_SCL 3
 
-#define BUTTON_PIN 7
+#define BUTTON_PIN 25
+#define ALT_BUTTON_PIN 7
 
 #define LED_PIN 13
 
@@ -17,9 +18,10 @@
 
 #define LED_POWER PIN_LED
 
-// #define BATTERY_PIN 26
-// ratio of voltage divider = 3.0 (R17=200k, R18=100k)
-// #define ADC_MULTIPLIER 3.1 // 3.0 + a bit for being optimistic
+#define BATTERY_PIN 29
+// ratio of voltage divider = 3.0 (R1=20k, R2=10k)
+#define ADC_MULTIPLIER 3.0
+#define BATTERY_SENSE_RESOLUTION_BITS 12
 
 #define USE_RF95 // RFM95/SX127x
 

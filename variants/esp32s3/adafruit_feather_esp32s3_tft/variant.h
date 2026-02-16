@@ -3,6 +3,8 @@
 
 #define LED_PIN 13
 
+// #define HAS_DRV2605 1
+
 #define HAS_NEOPIXEL
 #define NEOPIXEL_COUNT 1
 #define NEOPIXEL_DATA 33
