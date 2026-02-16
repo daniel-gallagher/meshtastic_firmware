@@ -69,6 +69,50 @@ RTCSetResult readFromRTC()
     } else {
         LOG_WARN("RTC not found (found address 0x%02X)", rtc_found.address);
     }
+#elif defined(RV1805_RTC)
+    if (rtc_found.address == RV1805_RTC) {
+        uint32_t now = millis();
+        RV1805 rtc;
+#if WIRE_INTERFACES_COUNT == 2
+        rtc.begin(rtc_found.port == ScanI2C::I2CPort::WIRE1 ? Wire1 : Wire);
+#else
+        rtc.begin(Wire);
+#endif
+        if (rtc.updateTime()) {
+            tm t;
+            t.tm_year = rtc.getYear() + 100;
+            t.tm_mon = rtc.getMonth() - 1;
+            t.tm_mday = rtc.getDate();
+            t.tm_hour = rtc.getHours();
+            t.tm_min = rtc.getMinutes();
+            t.tm_sec = rtc.getSeconds();
+            tv.tv_sec = gm_mktime(&t);
+            tv.tv_usec = 0;
+            uint32_t printableEpoch = tv.tv_sec; // Print lib only supports 32 bit but time_t can be 64 bit on some platforms
+
+#ifdef BUILD_EPOCH
+            if (tv.tv_sec < BUILD_EPOCH) {
+                if (Throttle::isWithinTimespanMs(lastTimeValidationWarning, TIME_VALIDATION_WARNING_INTERVAL_MS) == false) {
+                    LOG_WARN("Ignore time (%ld) before build epoch (%ld)!", printableEpoch, BUILD_EPOCH);
+                }
+                return RTCSetResultInvalidTime;
+            }
+#endif
+
+            LOG_DEBUG("Read RTC time from RV1805 updateTime as %02d-%02d-%02d %02d:%02d:%02d (%ld)", t.tm_year + 1900,
+                      t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, printableEpoch);
+            if (currentQuality == RTCQualityNone) {
+                timeStartMsec = now;
+                zeroOffsetSecs = tv.tv_sec;
+                currentQuality = RTCQualityDevice;
+            }
+            return RTCSetResultSuccess;
+        } else {
+            LOG_WARN("Failed to read time from RV1805");
+        }
+    } else {
+        LOG_WARN("RTC not found (found address 0x%02X)", rtc_found.address);
+    }
 #elif defined(PCF8563_RTC) || defined(PCF85063_RTC)
 #if defined(PCF8563_RTC)
     if (rtc_found.address == PCF8563_RTC) {
@@ -234,6 +278,24 @@ RTCSetResult perhapsSetRTC(RTCQuality q, const struct timeval *tv, bool forceUpd
             rtc.setTime(t->tm_year + 1900, t->tm_mon + 1, t->tm_wday, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
             LOG_DEBUG("RV3028_RTC setTime %02d-%02d-%02d %02d:%02d:%02d (%ld)", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
                       t->tm_hour, t->tm_min, t->tm_sec, printableEpoch);
+        } else {
+            LOG_WARN("RTC not found (found address 0x%02X)", rtc_found.address);
+        }
+#elif defined(RV1805_RTC)
+        if (rtc_found.address == RV1805_RTC) {
+            RV1805 rtc;
+#if WIRE_INTERFACES_COUNT == 2
+            rtc.begin(rtc_found.port == ScanI2C::I2CPort::WIRE1 ? Wire1 : Wire);
+#else
+            rtc.begin(Wire);
+#endif
+            tm *t = gmtime(&tv->tv_sec);
+            if (rtc.setTime(0, t->tm_sec, t->tm_min, t->tm_hour, t->tm_mday, t->tm_mon + 1, t->tm_year + 1900, t->tm_wday + 1)) {
+                LOG_DEBUG("RV1805 setTime %02d-%02d-%02d %02d:%02d:%02d (%ld)", t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+                          t->tm_hour, t->tm_min, t->tm_sec, printableEpoch);
+            } else {
+                LOG_WARN("Failed to set time for RV1805");
+            }
         } else {
             LOG_WARN("RTC not found (found address 0x%02X)", rtc_found.address);
         }

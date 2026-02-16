@@ -6,6 +6,8 @@
 #define I2C_SDA 2
 #define I2C_SCL 3
 
+#define RV1805_RTC 0x69
+
 #define BUTTON_PIN 25
 #define ALT_BUTTON_PIN 7
 
@@ -16,11 +18,11 @@
 #define NEOPIXEL_DATA 4
 #define NEOPIXEL_TYPE (NEO_GRB + NEO_KHZ800)
 
-#define LED_POWER PIN_LED
+#define LED_POWER LED_BUILTIN
 
 #define BATTERY_PIN 29
 // ratio of voltage divider = 3.0 (R1=20k, R2=10k)
-#define ADC_MULTIPLIER 3.0
+#define ADC_MULTIPLIER 3
 #define BATTERY_SENSE_RESOLUTION_BITS 12
 
 #define USE_RF95 // RFM95/SX127x
