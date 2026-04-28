@@ -1,3 +1,4 @@
+#pragma once
 #define I2C_SDA 42
 #define I2C_SCL 41
 
@@ -40,7 +41,7 @@
 #define ST7789_SCK SPI_SCK
 #define ST7789_RS 39
 #define ST7789_RESET 40
-#define ST7789_BUSY -1
+#define ST7789_BUSY (-1)
 #define ST7789_BL TFT_BL
 #define SPI_FREQUENCY 40000000
 #define SPI_READ_FREQUENCY 16000000
