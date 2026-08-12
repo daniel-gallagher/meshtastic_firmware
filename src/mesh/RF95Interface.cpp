@@ -116,6 +116,11 @@ void RF95Interface::setTransmitEnable(bool txon)
 /// \return true if initialisation succeeded.
 bool RF95Interface::init()
 {
+#ifdef RF95_POWER_EN
+    pinMode(RF95_POWER_EN, OUTPUT);
+    digitalWrite(RF95_POWER_EN, HIGH);
+#endif
+
     RadioLibInterface::init();
 
 #if defined(RADIOMASTER_900_BANDIT_NANO) || defined(RADIOMASTER_900_BANDIT)
@@ -199,7 +204,7 @@ bool RF95Interface::init()
     return res == RADIOLIB_ERR_NONE;
 }
 
-void RF95Interface::disableInterrupt()
+void RF95Interface::clearRadioIsr()
 {
     lora->clearDio0Action();
 }
@@ -255,7 +260,7 @@ bool RF95Interface::reconfigure()
 
     startReceive(); // restart receiving
 
-    return RADIOLIB_ERR_NONE;
+    return true;
 }
 
 /**
@@ -265,6 +270,7 @@ void RF95Interface::addReceiveMetadata(meshtastic_MeshPacket *mp)
 {
     mp->rx_snr = lora->getSNR();
     mp->rx_rssi = lround(lora->getRSSI());
+    mp->has_rx_rssi = true; // rx_rssi has explicit presence - a genuine reading must be marked present to survive encoding
     LOG_DEBUG("Corrected frequency offset: %f", lora->getFrequencyError());
 }
 
@@ -316,14 +322,14 @@ bool RF95Interface::isChannelActive()
     result = lora->scanChannel();
 
     if (result == RADIOLIB_PREAMBLE_DETECTED) {
-        // LOG_DEBUG("Channel is busy!");
+        // LOG_DEBUG("Channel is busy");
         return true;
     }
     if (result != RADIOLIB_CHANNEL_FREE)
         LOG_ERROR("RF95 isChannelActive %s%d", radioLibErr, result);
     assert(result != RADIOLIB_ERR_WRONG_MODEM);
 
-    // LOG_DEBUG("Channel is free!");
+    // LOG_DEBUG("Channel is free");
     return false;
 }
 
@@ -339,10 +345,20 @@ bool RF95Interface::sleep()
     setStandby(); // First cancel any active receiving/sending
     lora->sleep();
 
+#ifdef RF95_POWER_EN
+    digitalWrite(RF95_POWER_EN, LOW);
+#endif
+
 #ifdef RF95_FAN_EN
     digitalWrite(RF95_FAN_EN, 0);
 #endif
 
     return true;
+}
+
+int16_t RF95Interface::getCurrentRSSI()
+{
+    float rssi = lora->getRSSI(false);
+    return (int16_t)round(rssi);
 }
 #endif

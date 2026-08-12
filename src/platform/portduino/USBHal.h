@@ -5,8 +5,10 @@
 #include "platform/portduino/PortduinoGlue.h"
 #include <RadioLib.h>
 #include <csignal>
+#include <cstring>
 #include <iostream>
 #include <libpinedio-usb.h>
+#include <sys/time.h> // gettimeofday(), previously pulled in via libusb.h
 #include <unistd.h>
 
 extern uint32_t rebootAtMsec;
@@ -34,7 +36,7 @@ class Ch341Hal : public RadioLibHal
         : RadioLibHal(PI_INPUT, PI_OUTPUT, PI_LOW, PI_HIGH, PI_RISING, PI_FALLING)
     {
         if (serial != "") {
-            strncpy(pinedio.serial_number, serial.c_str(), 8);
+            std::strncpy(pinedio.serial_number, serial.c_str(), 8);
             pinedio_set_option(&pinedio, PINEDIO_OPTION_SEARCH_SERIAL, 1);
         }
         // LOG_INFO("USB Serial: %s", pinedio.serial_number);
@@ -59,8 +61,11 @@ class Ch341Hal : public RadioLibHal
 
     void getSerialString(char *_serial, size_t len)
     {
-        len = len > 8 ? 8 : len;
-        strncpy(_serial, pinedio.serial_number, len);
+        if (len == 0)
+            return;
+        size_t bytesCopied = (len - 1) < 8 ? (len - 1) : 8;
+        std::strncpy(_serial, pinedio.serial_number, bytesCopied);
+        _serial[bytesCopied] = '\0';
     }
 
     void getProductString(char *_product_string, size_t len)
@@ -84,7 +89,7 @@ class Ch341Hal : public RadioLibHal
         }
         auto res = pinedio_set_pin_mode(&pinedio, pin, mode);
         if (res < 0 && rebootAtMsec == 0) {
-            LOG_ERROR("USBHal pinMode: Could not set pin %u mode to %u: %d", pin, mode, res);
+            LOG_ERROR("USBHal pinMode: Can't set pin %u mode to %u: %d", pin, mode, res);
         }
     }
 
@@ -98,7 +103,7 @@ class Ch341Hal : public RadioLibHal
         }
         auto res = pinedio_digital_write(&pinedio, pin, value);
         if (res < 0 && rebootAtMsec == 0) {
-            LOG_ERROR("USBHal digitalWrite: Could not write pin %u: %d", pin, res);
+            LOG_ERROR("USBHal digitalWrite: Can't write pin %u: %d", pin, res);
             portduino_status.LoRa_in_error = true;
         }
     }
@@ -113,7 +118,7 @@ class Ch341Hal : public RadioLibHal
         }
         auto res = pinedio_digital_read(&pinedio, pin);
         if (res < 0 && rebootAtMsec == 0) {
-            LOG_ERROR("USBHal digitalRead: Could not read pin %u: %d", pin, res);
+            LOG_ERROR("USBHal digitalRead: Can't read pin %u: %d", pin, res);
             portduino_status.LoRa_in_error = true;
             return 0;
         }
